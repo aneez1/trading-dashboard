@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Scanner Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 12px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            padding: 8px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .card-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .card-field {
+            color: #666;
+        }
+
+        .card-value {
+            font-weight: 600;
+        }
+
+        .success {
+            color: #22c55e;
+        }
+
+        .danger {
+            color: #ef4444;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            background: #1a3a1a;
+            border: 1px solid #22c55e;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 6px 8px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .settings-panel {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+        }
+
+        .settings-panel h3 {
+            font-size: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .settings-panel label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .positive-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .negative-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Trading Command Center</h1>
+            <p class="subtitle">Real-time breakout scanner, trending stocks, and market alerts</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Portfolio</div>
+                <div class="stat-value">$25,000</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active</div>
+                <div class="stat-value" id="activeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">P&L Today</div>
+                <div class="stat-value" id="pnlToday">$0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Status</div>
+                <div class="stat-value success">Market open</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('scanner')">Breakout Scanner</button>
+            <button class="tab-btn" onclick="showTab('trending')">Trending Stocks</button>
+            <button class="tab-btn" onclick="showTab('news')">Market News</button>
+            <button class="tab-btn" onclick="showTab('ipos')">IPO Calendar</button>
+            <button class="tab-btn" onclick="showTab('positions')">Trades</button>
+            <button class="tab-btn" onclick="showTab('settings')" style="margin-left: auto;">⚙ Settings</button>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings" class="hidden">
+            <div class="settings-panel">
+                <h3>Settings</h3>
+                <label>Portfolio Size ($)</label>
+                <input type="number" id="portfolioSize" value="25000">
+                <label>Discord Webhook URL</label>
+                <input type="text" id="discordWebhook" placeholder="https://discordapp.com/api/webhooks/...">
+                <button onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+
+        <!-- Breakout Scanner Tab -->
+        <div id="scanner" class="content">
+            <div class="card">
+                <div class="card-title">PZLW</div>
+                <div class="card-subtitle">FDA approval rumor</div>
+                <div class="card-row">
+                    <div><div class="card-field">Price</div><div class="card-value">$3.45</div></div>
+                    <div><div class="card-field">Gap</div><div class="card-value success">+8.5%</div></div>
+                    <div><div class="card-field">Volume</div><div class="card-value">2.8x</div></div>
+                    <div><div class="card-field">R:R</div><div class="card-value">1:2.15</div></div>
+                </div>
+                <button onclick="enterTrade('PZLW', 3.65, 3.20, 3.85)">Enter trade</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">NOVV</div>
+                <div class="card-subtitle">Earnings beat</div>
+                <div class="card-row">
+                    <div><div class="card-field">Price</div><div class="card-value">$7.82</div></div>
+                    <div><div class="card-field">Gap</div><div class="card-value success">+4.2%</div></div>
+                    <div><div class="card-field">Volume</div><div class="card-value">2.3x</div></div>
+                    <div><div class="card-field">R:R</div><div class="card-value">1:1.87</div></div>
+                </div>
+                <button onclick="enterTrade('NOVV', 8.15, 7.45, 8.50)">Enter trade</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">GRVY</div>
+                <div class="card-subtitle">Acquisition news</div>
+                <div class="card-row">
+                    <div><div class="card-field">Price</div><div class="card-value">$2.15</div></div>
+                    <div><div class="card-field">Gap</div><div class="card-value success">+9.3%</div></div>
+                    <div><div class="card-field">Volume</div><div class="card-value">3.5x</div></div>
+                    <div><div class="card-field">R:R</div><div class="card-value">1:2.34</div></div>
+                </div>
+                <button onclick="enterTrade('GRVY', 2.35, 1.95, 2.50)">Enter trade</button>
+            </div>
+        </div>
+
+        <!-- Trending Stocks Tab -->
+        <div id="trending" class="content hidden">
+            <div class="card">
+                <div class="card-title">GME</div>
+                <div class="card-subtitle">Meme Stock</div>
+                <div class="card-row">
+                    <div><div class="card-field">Price</div><div class="card-value">$18.45</div></div>
+                    <div><div class="card-field">Change</div><div class="card-value success">+12.3%</div></div>
+                </div>
+                <div style="background: #2a2a2a; padding: 8px; border-radius: 4px; margin: 10px 0; font-size: 12px;">
+                    <div class="card-field">Mentions: 4,250</div>
+                </div>
+                <div class="card-subtitle">Roaring Kitty activity</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">MVST</div>
+                <div class="card-subtitle">Multi-Runner</div>
+                <div class="card-row">
+                    <div><div class="card-field">Price</div><div class="card-value">$2.92</div></div>
+                    <div><div class="card-field">Change</div><div class="card-value success">+45.2%</div></div>
+                </div>
+                <div style="background: #2a2a2a; padding: 8px; border-radius: 4px; margin: 10px 0; font-size: 12px;">
+                    <div class="card-field">Mentions: 3,120</div>
+                </div>
+                <div class="card-subtitle">Volume spike</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">BGFV</div>
+                <div class="card-subtitle">Volume Mover</div>
+                <div class="card-row">
+                    <div><div class="card-field">Price</div><div class="card-value">$12.15</div></div>
+                    <div><div class="card-field">Change</div><div class="card-value success">+28.7%</div></div>
+                </div>
+                <div style="background: #2a2a2a; padding: 8px; border-radius: 4px; margin: 10px 0; font-size: 12px;">
+                    <div class="card-field">Mentions: 2,890</div>
+                </div>
+                <div class="card-subtitle">Short squeeze</div>
+            </div>
+        </div>
+
+        <!-- Market News Tab -->
+        <div id="news" class="content hidden" style="grid-template-columns: 1fr;">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div><div class="card-title">Tech stocks surge on earnings beat</div></div>
+                    <span class="positive-badge">positive</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                    <span>TECH</span><span>2 mins ago</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div><div class="card-title">Fed signals rate pause, markets rally</div></div>
+                    <span class="positive-badge">positive</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                    <span>MARKET</span><span>15 mins ago</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div><div class="card-title">Biotech sector pressured by clinical trial data</div></div>
+                    <span class="negative-badge">negative</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                    <span>BIOTECH</span><span>32 mins ago</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                    <div><div class="card-title">Energy stocks hit 52-week high on oil jump</div></div>
+                    <span class="positive-badge">positive</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                    <span>ENERGY</span><span>1 hour ago</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- IPO Calendar Tab -->
+        <div id="ipos" class="content hidden">
+            <div class="card">
+                <div class="card-title">NEWCO</div>
+                <div class="card-subtitle">NewCo Tech Inc</div>
+                <div class="card-row">
+                    <div><div class="card-field">Date</div><div class="card-value">2026-05-15</div></div>
+                    <div><div class="card-field">Price</div><div class="card-value">$18-22</div></div>
+                </div>
+                <div style="font-size: 12px; color: #666;">Technology</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">BIOXA</div>
+                <div class="card-subtitle">BioXa Pharmaceuticals</div>
+                <div class="card-row">
+                    <div><div class="card-field">Date</div><div class="card-value">2026-05-22</div></div>
+                    <div><div class="card-field">Price</div><div class="card-value">$12-16</div></div>
+                </div>
+                <div style="font-size: 12px; color: #666;">Healthcare</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">ECOV</div>
+                <div class="card-subtitle">EcoVenture</div>
+                <div class="card-row">
+                    <div><div class="card-field">Date</div><div class="card-value">2026-06-05</div></div>
+                    <div><div class="card-field">Price</div><div class="card-value">$8-12</div></div>
+                </div>
+                <div style="font-size: 12px; color: #666;">Clean Energy</div>
+            </div>
+        </div>
+
+        <!-- Open Trades Tab -->
+        <div id="positions" class="content hidden" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+            <div style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">No open trades</div>
+        </div>
+
+        <div class="footer">
+            <p>Trading Scanner v1.0 | Backend: Railway.app | Frontend: Vercel</p>
+        </div>
+    </div>
+
+    <script>
+        let trades = [];
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('settings').classList.add('hidden');
+            
+            // Show selected tab
+            if (tabName === 'settings') {
+                document.getElementById('settings').classList.remove('hidden');
+            } else {
+                document.getElementById(tabName).classList.remove('hidden');
+            }
+
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function enterTrade(ticker, entry, stop, target) {
+            const portfolioSize = parseInt(document.getElementById('portfolioSize').value) || 25000;
+            const riskAmount = portfolioSize * 0.05;
+            const riskPerShare = Math.abs(entry - stop);
+            const shares = Math.floor(riskAmount / riskPerShare);
+            const entryValue = entry * shares;
+
+            const trade = {
+                id: Date.now(),
+                ticker,
+                entry,
+                stop,
+                target,
+                shares,
+                entryValue,
+                currentPrice: entry,
+                status: 'ACTIVE',
+                timeEntered: new Date().toLocaleTimeString()
+            };
+
+            trades.push(trade);
+            updateStats();
+            alert(`Entered ${ticker}\n${shares} shares at $${entry.toFixed(2)}\nRisk: $${(entry * shares - stop * shares).toFixed(2)}`);
+        }
+
+        function updateStats() {
+            const activeTrades = trades.filter(t => t.status === 'ACTIVE').length;
+            const totalPnL = trades.reduce((sum, t) => {
+                const pnl = (t.currentPrice - t.entry) * t.shares;
+                return sum + pnl;
+            }, 0);
+
+            document.getElementById('activeCount').textContent = activeTrades;
+            document.getElementById('pnlToday').textContent = '$' + Math.round(totalPnL);
+            document.getElementById('pnlToday').className = 'stat-value' + (totalPnL >= 0 ? ' success' : ' danger');
+        }
+
+        function saveSettings() {
+            alert('Settings saved!');
+        }
+
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>
